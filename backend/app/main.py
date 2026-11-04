@@ -125,7 +125,7 @@ def assistant_chat(payload:ChatIn,db:Session=Depends(get_db)):
     c=db.get(Conversation,payload.conversation_id) if payload.conversation_id else None
     if payload.conversation_id and not c:raise HTTPException(404,"Conversation not found")
     if not c:c=Conversation(); db.add(c); db.commit(); db.refresh(c)
-    files=db.scalars(select(UploadedFile).where(UploadedFile.id.in_(payload.file_ids),UploadedFile.conversation_id==c.id)).all() if payload.file_ids else []
+    files: list[UploadedFile]=list(db.scalars(select(UploadedFile).where(UploadedFile.id.in_(payload.file_ids),UploadedFile.conversation_id==c.id)).all()) if payload.file_ids else []
     if len(files)!=len(set(payload.file_ids)): raise HTTPException(400,"One or more attachments are not available in this conversation.")
     content=payload.message.strip() or "Please analyze the attached file(s) and summarize what you find."
     user=Message(conversation_id=c.id,role="user",content=content); db.add(user); db.flush()
