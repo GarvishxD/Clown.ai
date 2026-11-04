@@ -35,6 +35,12 @@ async def unexpected_error(request: Request, exc: Exception):
     print(f"Unhandled API error at {request.url.path}: {type(exc).__name__}: {exc}")
     return JSONResponse(status_code=500,content={"detail":"Something went wrong on the server. Check the backend logs."})
 
+@app.get("/")
+@app.get("/api")
+def api_root():
+    """Provide a useful response when opening the deployed API domain directly."""
+    return {"ok":True,"service":"Clown.ai API","health":"/api/health","docs":"/docs"}
+
 @app.get("/api/health")
 def health(): return {"ok":True,"clown_ready":bool(os.getenv("GEMINI_API_KEY"))}
 @app.post("/api/conversations",response_model=ConversationOut)
